@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { FlatList, View, Button} from 'react-native';
+import { FlatList, View, Button, AsyncStorage} from 'react-native';
 import Post from './Post';
 
 export default class Feed extends Component {
@@ -12,26 +12,41 @@ export default class Feed extends Component {
 
     like = (idFoto) => {
         const foto = this.buscaPorId(idFoto);
-        
-        let novaLista = [];
-        if (!foto.likeada) {
-            novaLista = [
-                ...foto.likers,
-                {login : 'meuUsuario'}
-            ];
-        }else{
-            novaLista = foto.likers.filter(liker => {
-                return liker.login !== 'meuUsuario'
-            });
-        }
 
-        const fotoAtualizada = {
-            ...foto,
-            likeada: !foto.likeada,
-            likers: novaLista
-        }
+        AsyncStorage.getItem('usuario')
+            .then(usuarioLogado => {
+                let novaLista = [];
+                if (!foto.likeada) {
+                    novaLista = [
+                        ...foto.likers,
+                        {login : usuarioLogado}
+                    ];
+                }else{
+                    novaLista = foto.likers.filter(liker => {
+                        return liker.login !== usuarioLogado
+                    });
+                }
         
-        this.atualizaFotos(fotoAtualizada);
+                const fotoAtualizada = {
+                    ...foto,
+                    likeada: !foto.likeada,
+                    likers: novaLista
+                }
+                
+                this.atualizaFotos(fotoAtualizada);
+            })
+        
+        const uri = `https://instalura-api.herokuapp.com/api/fotos/${idFoto}/like`;
+        AsyncStorage.getItem('token')
+            .then(token => {
+                return {
+                    method: 'POST',
+                    headers: new Headers({
+                        'X-AUTH-TOKEN': token
+                    })
+                }
+            })
+            .then(requestInfo => fetch(uri, requestInfo));
     }
 
     adicionaComentario = (idFoto, valorComentario, inputComentario) =>{
@@ -68,9 +83,19 @@ export default class Feed extends Component {
     }
 
     componentDidMount(){
-        fetch('https://instalura-api.herokuapp.com/api/public/fotos/rafael')
-         .then(resposta => resposta.json())
-         .then(json => this.setState({fotos: json}));
+        const uri = 'https://instalura-api.herokuapp.com/api/fotos';
+        
+        AsyncStorage.getItem('token')
+            .then(token => {
+                return {
+                    headers: new Headers({
+                        'X-AUTH-TOKEN': token
+                    })
+                }
+            })
+            .then(requestInfo => fetch(uri, requestInfo))
+            .then(resposta => resposta.json())
+            .then(json => this.setState({fotos: json}));
     }
 
     render(){
