@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { FlatList, StyleSheet, Platform} from 'react-native';
+import { FlatList} from 'react-native';
 import Post from './Post';
 
 export default class Feed extends Component {
@@ -75,7 +75,7 @@ export default class Feed extends Component {
 
     render(){
         return(
-            <FlatList style={styles.container}
+            <FlatList
                 keyExtractor={item => String(item.id)}
                 data={this.state.fotos}
                 renderItem={({item}) => 
@@ -86,9 +86,3 @@ export default class Feed extends Component {
         );
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        marginTop: Platform.OS == 'ios' ? 20 : 0
-    }
-});
