@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { FlatList} from 'react-native';
+import { FlatList, View, Button} from 'react-native';
 import Post from './Post';
 
 export default class Feed extends Component {
@@ -75,14 +75,23 @@ export default class Feed extends Component {
 
     render(){
         return(
-            <FlatList
-                keyExtractor={item => String(item.id)}
-                data={this.state.fotos}
-                renderItem={({item}) => 
-                <Post foto={item} 
-                    likeCallback={this.like} 
-                    comentarioCallback={this.adicionaComentario} />
-            }/>
+            <View>
+                <Button title='AluraLingua' onPress={() => {
+                    this.props.navigator.showModal({
+                        screen: 'AluraLingua',
+                        title: 'AluraLingua'
+                    });
+                }} />
+            
+                <FlatList
+                    keyExtractor={item => String(item.id)}
+                    data={this.state.fotos}
+                    renderItem={({item}) => 
+                    <Post foto={item} 
+                        likeCallback={this.like} 
+                        comentarioCallback={this.adicionaComentario} />
+                }/>
+            </View>
         );
     }
 }
