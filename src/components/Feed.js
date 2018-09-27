@@ -55,20 +55,33 @@ export default class Feed extends Component {
 
         const foto = this.buscaPorId(idFoto);
 
-        const novaLista = [ ...foto.comentarios, {
-            id: valorComentario,
-            login: 'meuUsuario',
-            texto: valorComentario,
-        }];
+        const uri = `https://instalura-api.herokuapp.com/api/fotos/${idFoto}/comment`;
 
-        const fotoAtualizada ={
-            ...foto,
-            comentarios: novaLista,
-        }
+        AsyncStorage.getItem('token')
+            .then(token => {
+                return {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        texto: valorComentario
+                    }), 
+                    headers: new Headers({
+                        'Content-type': 'application/json',
+                        'X-AUTH-TOKEN': token
+                    })
+                }
+            })
+            .then(requestInfo => fetch(uri, requestInfo))
+            .then(resposta => resposta.json())
+            .then(comentario => [...foto.comentarios, comentario])
+            .then(novaLista => {
+                const fotoAtualizada = {
+                    ...foto,
+                    comentarios: novaLista
+                }
+                this.atualizaFotos(fotoAtualizada)
+                inputComentario.clear();
+            });
 
-        this.atualizaFotos(fotoAtualizada)
-        
-        inputComentario.clear();
     }
 
     buscaPorId(idFoto) {
