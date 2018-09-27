@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { FlatList, View, Button, AsyncStorage} from 'react-native';
 import Post from './Post';
+import InstaluraFetchService from '../services/InstaluraFetchService';
 
 export default class Feed extends Component {
     constructor(){
@@ -96,18 +97,7 @@ export default class Feed extends Component {
     }
 
     componentDidMount(){
-        const uri = 'https://instalura-api.herokuapp.com/api/fotos';
-        
-        AsyncStorage.getItem('token')
-            .then(token => {
-                return {
-                    headers: new Headers({
-                        'X-AUTH-TOKEN': token
-                    })
-                }
-            })
-            .then(requestInfo => fetch(uri, requestInfo))
-            .then(resposta => resposta.json())
+        InstaluraFetchService.get('/fotos')
             .then(json => this.setState({fotos: json}));
     }
 
