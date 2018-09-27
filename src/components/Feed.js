@@ -12,6 +12,7 @@ export default class Feed extends Component {
     }
 
     like = (idFoto) => {
+        const listaOriginal = this.state.fotos;
         const foto = this.buscaPorId(idFoto);
 
         AsyncStorage.getItem('usuario')
@@ -27,7 +28,8 @@ export default class Feed extends Component {
                         return liker.login !== usuarioLogado
                     });
                 }
-        
+                return novaLista;
+            }).then(novaLista => {
                 const fotoAtualizada = {
                     ...foto,
                     likeada: !foto.likeada,
@@ -35,9 +37,13 @@ export default class Feed extends Component {
                 }
                 
                 this.atualizaFotos(fotoAtualizada);
-            })
+            });
         
-        InstaluraFetchService.post(`/fotos/${idFoto}/like`);
+        InstaluraFetchService.post(`/fotos/${idFoto}/like`)
+            .catch(e => {
+                this.setState({fotos: listaOriginal});
+                Notificacao.exibe('Algo deu errado ao curtir.');
+            });
     }
 
     adicionaComentario = (idFoto, valorComentario, inputComentario) =>{
@@ -63,6 +69,22 @@ export default class Feed extends Component {
 
     }
 
+    async removeItensAsync() {
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('usuario');
+    }
+
+    logout = () => {
+        this.removeItensAsync().then(() => {
+            this.props.navigator.resetTo({
+                screen: 'Login',
+                title: 'Login',
+            });
+        }).catch(e => {
+            Notificacao.exibe('Erro ao fazer logout!');
+        });
+    }
+
     buscaPorId(idFoto) {
         return this.state.fotos.find(foto => foto.id === idFoto);
     }
@@ -82,6 +104,8 @@ export default class Feed extends Component {
     render(){
         return(
             <View>
+                <Button title='Logout' onPress={this.logout} />
+
                 <Button title='AluraLingua' onPress={() => {
                     this.props.navigator.showModal({
                         screen: 'AluraLingua',
