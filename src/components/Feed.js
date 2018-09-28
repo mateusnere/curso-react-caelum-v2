@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { FlatList, View, Button, AsyncStorage} from 'react-native';
+import { FlatList, Button, AsyncStorage, ScrollView} from 'react-native';
 import Post from './Post';
 import InstaluraFetchService from '../services/InstaluraFetchService';
 import HeaderUsuario from './HeaderUsuario';
@@ -129,7 +129,7 @@ export default class Feed extends Component {
 
     render(){
         return(
-            <View>
+            <ScrollView>
                 <Button title='Logout' onPress={this.logout} />
 
                 <Button title='AluraLingua' onPress={() => {
@@ -148,7 +148,7 @@ export default class Feed extends Component {
                         comentarioCallback={this.adicionaComentario} 
                         verPerfilCallback={this.verPerfilUsuario} />
                 }/>
-            </View>
+            </ScrollView>
         );
     }
 }
