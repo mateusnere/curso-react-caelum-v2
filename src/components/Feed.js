@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import { FlatList, View, Button, AsyncStorage} from 'react-native';
 import Post from './Post';
 import InstaluraFetchService from '../services/InstaluraFetchService';
+import HeaderUsuario from './HeaderUsuario';
 
 export default class Feed extends Component {
     constructor(){
@@ -69,6 +70,19 @@ export default class Feed extends Component {
 
     }
 
+    verPerfilUsuario = (idFoto) => {
+        const foto = this.buscaPorId(idFoto);
+        this.props.navigator.push({
+            screen: 'PerfilUsuario',
+            title: foto.loginUsuario,
+            backButtonTitle: '',
+            passProps: {
+                usuario: foto.loginUsuario,
+                fotoDePerfil: foto.urlPerfil
+            }
+        })
+    }
+
     async removeItensAsync() {
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('usuario');
@@ -97,8 +111,20 @@ export default class Feed extends Component {
     }
 
     componentDidMount(){
-        InstaluraFetchService.get('/fotos')
+        let uri = '/fotos';
+
+        if(this.props.usuario) {
+            uri = `/public/fotos/${this.props.usuario}`;
+        }
+
+        InstaluraFetchService.get(uri)
             .then(json => this.setState({fotos: json}));
+    }
+
+    exibeHeader() {
+        if(this.props.usuario) {
+            return <HeaderUsuario {...this.props} posts={this.state.fotos.length} />;
+        }
     }
 
     render(){
@@ -112,14 +138,15 @@ export default class Feed extends Component {
                         title: 'AluraLingua'
                     });
                 }} />
-            
+                {this.exibeHeader()}
                 <FlatList
                     keyExtractor={item => String(item.id)}
                     data={this.state.fotos}
                     renderItem={({item}) => 
                     <Post foto={item} 
                         likeCallback={this.like} 
-                        comentarioCallback={this.adicionaComentario} />
+                        comentarioCallback={this.adicionaComentario} 
+                        verPerfilCallback={this.verPerfilUsuario} />
                 }/>
             </View>
         );
